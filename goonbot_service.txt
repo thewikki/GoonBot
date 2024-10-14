@@ -1,0 +1,13 @@
+# save this file as goonbot.service at /etc/systemd/system
+[Unit]
+Description=Your Python Script
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/devin/goonbot/goonbot.py
+WorkingDirectory=/home/devin/goonbot
+Restart=always
+User=devin
+
+[Install]
+WantedBy=multi-user.target
