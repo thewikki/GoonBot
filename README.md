@@ -21,9 +21,9 @@ Running as a Service:
 
 
 
-Discord Developer Tools 
+- Discord Developer Tools 
 https://discord.com/developers/docs/developer-tools/game-sdk
-Discord Developer Site
+- Discord Developer Site
 https://discord.com/login?redirect_to=%2Fdevelopers%2Fapplications
-How to Enable Developer Mode in Discord and find your Channel ID
+- How to Enable Developer Mode in Discord and find your Channel ID
 https://support-dev.discord.com/hc/en-us/articles/360028717192-Where-can-I-find-my-Application-Team-Server-ID
