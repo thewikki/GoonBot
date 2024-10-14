@@ -17,10 +17,7 @@ Running as a Service:
 - type 'sudo systemctl enable goonbot' (this will allow the service to restart with the reboot/restart of the host)
 
 
-
-
-
-
+Helpful Information:
 - Discord Developer Tools 
 https://discord.com/developers/docs/developer-tools/game-sdk
 - Discord Developer Site
