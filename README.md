@@ -10,14 +10,14 @@ I currently have the bot running on a Linux Ubuntu 22.04 Server.
     - Input the Channel ID from the discord channel you want this bot to post in and place it in the channel_ids.txt file, then save that file.  https://support-dev.discord.com/hc/en-us/articles/360028717192-Where-can-I-find-my-Application-Team-Server-ID
  
 
-Running as a Service:
+## Running as a Service:
 - go to /etc/systemd/system
 - download the goonbot_service.txt file to that location
-- type 'sudo systemctl start goonbot'
-- type 'sudo systemctl enable goonbot' (this will allow the service to restart with the reboot/restart of the host)
+- type ```sudo systemctl start goonbot```
+- type ```sudo systemctl enable goonbot``` (this will allow the service to restart with the reboot/restart of the host)
 
 
-Helpful Information:
+## Helpful Information:
 - Discord Developer Tools 
 https://discord.com/developers/docs/developer-tools/game-sdk
 - Discord Developer Site
