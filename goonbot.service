@@ -7,7 +7,8 @@ After=network.target
 ExecStart=/usr/bin/python3 ~/goonbot/goonbot.py
 WorkingDirectory=~/goonbot
 Restart=always
-User=devin
+User=$USER
+User=$USER
 
 [Install]
 WantedBy=multi-user.target
