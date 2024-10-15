@@ -13,7 +13,10 @@ Create a goonbot directory
 ```mkdir goonbot```
 
 create a .env file for the discord token
-```nano .env```  how to get the discord token https://discord.com/login?redirect_to=%2Fdevelopers%2Fapplications
+```nano .env```  
+
+how to get the discord token https://discord.com/login?redirect_to=%2Fdevelopers%2Fapplications
+
 How to make your own Discord bot:
 
     Turn on “Developer mode” in your Discord account.
@@ -31,6 +34,7 @@ DISCORD_TOKEN=(insert discord token here) **Do not give out your Bot Token**
 create a file named channel_ids.txt
 ```nano channel_ids.txt```
 Right click on the channel you want the bot to post to, then click copy id. Enter just the ID into the file and save and exit the file. 
+
 https://support-dev.discord.com/hc/en-us/articles/360028717192-Where-can-I-find-my-Application-Team-Server-ID
 
 Download the goonbot.py file into the goonbot directory
