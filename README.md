@@ -1,5 +1,6 @@
 # GoonBot
 EFT GoonTracker Discord Bot 
+
 ** This Bot will post every 5 minutes. I recommend muting the channel you have the bot posting to. The reports for this bot depend on the reporting and API from tarkovpal.com.
 
 I currently have the bot running on a Linux Ubuntu 22.04 Server. 
