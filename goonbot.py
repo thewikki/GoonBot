@@ -5,8 +5,15 @@ import discord
 from discord.ext import commands, tasks
 from discord import Embed, File
 import json
+import os
+from dotenv import load_dotenv  # Import dotenv
 
-TOKEN = 'Discord token here'  # Replace with your Discord bot token
+# Load environment variables from the .env file
+load_dotenv()
+
+# Get the Discord token from the environment variables
+TOKEN = os.getenv('DISCORD_TOKEN')
+
 API_URL = 'https://tarkovpal.com/api'  # Replace with your API endpoint URL
 TIMEZONE = 'America/Chicago'  # Set the timezone to 'America/Chicago' for Dallas, TX (CST)
 CHANNEL_FILE = 'channel_ids.txt'  # Path to the text file containing channel IDs
@@ -42,6 +49,9 @@ async def track_updates():
         if channel is None:
             print(f"Failed to find channel with ID {channel_id}")
             continue
+
+        # Remove previous messages
+        await channel.purge(limit=10, check=lambda msg: msg.author == bot.user)
 
         embed = Embed(title="Goons, Where are you?", color=discord.Color.dark_red())
         embed.add_field(name="Current Location", value=f"[{current_map}](https://tarkovpal.com)", inline=False)
