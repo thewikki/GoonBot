@@ -8,7 +8,6 @@ ExecStart=/usr/bin/python3 ~/goonbot/goonbot.py
 WorkingDirectory=~/goonbot
 Restart=always
 User=$USER
-User=$USER
 
 [Install]
 WantedBy=multi-user.target
