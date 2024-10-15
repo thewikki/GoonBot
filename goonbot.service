@@ -4,10 +4,10 @@ Description=Your Python Script
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 ~/goonbot/goonbot.py
-WorkingDirectory=~/goonbot
+ExecStart=/usr/bin/python3 /home/<user>/goonbot/goonbot.py
+WorkingDirectory=/home/<user>/goonbot
 Restart=always
-User=$USER
+User=<user>
 
 [Install]
 WantedBy=multi-user.target
