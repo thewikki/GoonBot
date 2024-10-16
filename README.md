@@ -108,3 +108,7 @@ Then enable the service
 ```
 sudo systemctl enable goonbot.service
 ```
+
+## Support
+
+For support or use the bot in my discord, join [Here](https://discord.gg/VzUdSqn)
