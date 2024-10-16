@@ -1,6 +1,10 @@
 
 # GoonBot
 
+![Bot Online](https://github.com/user-attachments/assets/b82fdb1a-5f49-463d-aae4-14a1f3b71212)
+
+![Bot Post](https://github.com/user-attachments/assets/b9c68f23-e4bd-4d7b-83e5-9826a0b18aa4)
+
 EFT GoonTracker Discord Bot using Tarkovpal.com API
 
 **This Bot will post every 5 minutes. I recommend muting the channel you have the bot posting to.**
