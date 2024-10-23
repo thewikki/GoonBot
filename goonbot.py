@@ -50,8 +50,14 @@ async def track_updates():
             print(f"Failed to find channel with ID {channel_id}")
             continue
 
-        # Remove previous messages
-        await channel.purge(limit=10, check=lambda msg: msg.author == bot.user)
+        # Check if the bot has permission to manage messages
+        permissions = channel.permissions_for(channel.guild.me)
+        if not permissions.manage_messages:
+            print(f"Missing Manage Messages permission in channel {channel_id}")
+            continue
+
+        # Remove previous messages by custom purge method
+        await custom_purge(channel, limit=10)
 
         embed = Embed(title="Goons, Where are you?", color=discord.Color.dark_red())
         embed.add_field(name="Current Location", value=f"[{current_map}](https://tarkovpal.com)", inline=False)
@@ -76,6 +82,19 @@ async def track_updates():
             await channel.send(file=file, embed=embed)
         else:
             await channel.send(embed=embed)
+
+# Custom purge method to delete messages one by one
+async def custom_purge(channel, limit=10):
+    messages = []
+    async for message in channel.history(limit=limit):
+        messages.append(message)
+
+    for message in messages:
+        if message.author == bot.user:
+            try:
+                await message.delete()
+            except discord.errors.Forbidden:
+                print(f"Failed to delete message {message.id} due to missing permissions")
 
 @bot.command()
 async def track(ctx, channel_id_param=None):
