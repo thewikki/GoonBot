@@ -6,7 +6,8 @@ from discord.ext import commands, tasks
 from discord import Embed, File
 import json
 import os
-from dotenv import load_dotenv  # Import dotenv
+from dotenv import load_dotenv
+import logging
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -14,9 +15,19 @@ load_dotenv()
 # Get the Discord token from the environment variables
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-API_URL = 'https://tarkovpal.com/api'  # Replace with your API endpoint URL
-TIMEZONE = 'America/Chicago'  # Set the timezone to 'America/Chicago' for Dallas, TX (CST)
-CHANNEL_FILE = 'channel_ids.txt'  # Path to the text file containing channel IDs
+API_URL = 'https://tarkovpal.com/api'
+TIMEZONE = 'America/Chicago'
+CHANNEL_FILE = 'channel_ids.txt'
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,  # Adjust to DEBUG for more details
+    format='%(asctime)s %(levelname)s %(message)s',
+    handlers=[
+        logging.FileHandler("bot.log"),
+        logging.StreamHandler()
+    ]
+)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -28,7 +39,7 @@ current_map = "N/A"
 
 @bot.event
 async def on_ready():
-    print(f'Logged in as {bot.user.name}')
+    logging.info(f'Logged in as {bot.user.name}')
     await bot.change_presence(activity=discord.Game(name="Tracking updates..."))
     load_channel_ids()
     track_updates.start()
@@ -36,52 +47,58 @@ async def on_ready():
 @tasks.loop(minutes=5)
 async def track_updates():
     global current_map
-    response = requests.get(API_URL)
-    data = response.json()  # Assuming the API response is in JSON format
+    try:
+        response = requests.get(API_URL)
+        response.raise_for_status()
+        data = response.json()
+        logging.info("Successfully fetched data from API.")
 
-    current_map = data.get('Current Map', ['N/A'])[0]
-    await bot.change_presence(activity=discord.Game(name=f"{current_map}"))
+        current_map = data.get('Current Map', ['N/A'])[0]
+        await bot.change_presence(activity=discord.Game(name=f"{current_map}"))
 
-    times = data.get('Time', [])
+        times = data.get('Time', [])
 
-    for channel_id in channel_ids:
-        channel = bot.get_channel(channel_id)
-        if channel is None:
-            print(f"Failed to find channel with ID {channel_id}")
-            continue
+        for channel_id in channel_ids:
+            channel = bot.get_channel(channel_id)
+            if channel is None:
+                logging.warning(f"Failed to find channel with ID {channel_id}")
+                continue
 
-        # Check if the bot has permission to manage messages
-        permissions = channel.permissions_for(channel.guild.me)
-        if not permissions.manage_messages:
-            print(f"Missing Manage Messages permission in channel {channel_id}")
-            continue
+            # Check if the bot has permission to manage messages
+            permissions = channel.permissions_for(channel.guild.me)
+            if not permissions.manage_messages:
+                logging.warning(f"Missing Manage Messages permission in channel {channel_id}")
+                continue
 
-        # Remove previous messages by custom purge method
-        await custom_purge(channel, limit=10)
+            # Remove previous messages by custom purge method
+            await custom_purge(channel, limit=10)
 
-        embed = Embed(title="Goons, Where are you?", color=discord.Color.dark_red())
-        embed.add_field(name="Current Location", value=f"[{current_map}](https://tarkovpal.com)", inline=False)
+            embed = Embed(title="Goons, Where are you?", color=discord.Color.dark_red())
+            embed.add_field(name="Current Location", value=f"[{current_map}](https://tarkovpal.com)", inline=False)
 
-        for reported_time in times:
-            datetime_object = datetime.strptime(reported_time, '%B %d, %Y, %I:%M %p')
-            datetime_object = pytz.timezone(TIMEZONE).localize(datetime_object)
-            current_time = datetime.now(pytz.timezone(TIMEZONE))
-            time_difference = current_time - datetime_object
+            for reported_time in times:
+                datetime_object = datetime.strptime(reported_time, '%B %d, %Y, %I:%M %p')
+                datetime_object = pytz.timezone(TIMEZONE).localize(datetime_object)
+                current_time = datetime.now(pytz.timezone(TIMEZONE))
+                time_difference = current_time - datetime_object
 
-            last_seen = f"{int(time_difference.total_seconds() / 60 * -1)} minutes ago"
-            embed.add_field(name="Last Seen", value=last_seen, inline=False)
+                last_seen = f"{int(time_difference.total_seconds() / 60 * -1)} minutes ago"
+                embed.add_field(name="Last Seen", value=last_seen, inline=False)
 
-        embed.add_field(name="Bot Data", value="provided from TarkovPal.com")
+            embed.add_field(name="Bot Data", value="provided from TarkovPal.com")
 
-        image_url = get_map_image_url(current_map.lower())
-        image_file = await download_image(image_url)
+            image_url = get_map_image_url(current_map.lower())
+            image_file = await download_image(image_url)
 
-        if image_file is not None:
-            file = File(image_file, filename='map_image.png')
-            embed.set_image(url=f'attachment://map_image.png')
-            await channel.send(file=file, embed=embed)
-        else:
-            await channel.send(embed=embed)
+            if image_file is not None:
+                file = File(image_file, filename='map_image.png')
+                embed.set_image(url=f'attachment://map_image.png')
+                await channel.send(file=file, embed=embed)
+            else:
+                await channel.send(embed=embed)
+
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching data from API: {e}")
 
 # Custom purge method to delete messages one by one
 async def custom_purge(channel, limit=10):
@@ -94,7 +111,7 @@ async def custom_purge(channel, limit=10):
             try:
                 await message.delete()
             except discord.errors.Forbidden:
-                print(f"Failed to delete message {message.id} due to missing permissions")
+                logging.warning(f"Failed to delete message {message.id} due to missing permissions")
 
 @bot.command()
 async def track(ctx, channel_id_param=None):
@@ -104,8 +121,10 @@ async def track(ctx, channel_id_param=None):
             channel_ids.append(channel_id)
             save_channel_ids()
             await ctx.send(f"Tracking updates in channel ID: {channel_id}")
+            logging.info(f"Added channel {channel_id} to tracking list.")
         else:
             await ctx.send(f"Channel ID {channel_id} is already being tracked.")
+            logging.info(f"Channel ID {channel_id} is already tracked.")
     else:
         await ctx.send("Please provide a channel ID.")
 
@@ -113,6 +132,7 @@ async def track(ctx, channel_id_param=None):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("Invalid command. Use !track to track the current map.")
+        logging.warning("Invalid command used.")
 
 @bot.event
 async def on_message(message):
@@ -126,22 +146,26 @@ async def download_image(url):
         response.raise_for_status()
         with open('map_image.png', 'wb') as file:
             file.write(response.content)
+        logging.info("Image downloaded successfully.")
         return 'map_image.png'
     except Exception as e:
-        print(f"Failed to download image: {e}")
+        logging.error(f"Failed to download image: {e}")
         return None
 
 def save_channel_ids():
     with open(CHANNEL_FILE, 'w') as file:
         file.write('\n'.join(map(str, channel_ids)))
+    logging.info("Channel IDs saved successfully.")
 
 def load_channel_ids():
     global channel_ids
     try:
         with open(CHANNEL_FILE, 'r') as file:
             channel_ids = [int(line.strip()) for line in file.readlines()]
+        logging.info("Channel IDs loaded successfully.")
     except FileNotFoundError:
         channel_ids = []
+        logging.warning("Channel file not found; starting with an empty list.")
 
 def get_map_image_url(map_name):
     map_images = {
@@ -156,5 +180,6 @@ def get_map_image_url(map_name):
 @bot.event
 async def on_connect():
     await bot.change_presence(activity=discord.Game(name="Tracking updates..."))
+    logging.info("Bot connected.")
 
 bot.run(TOKEN)
