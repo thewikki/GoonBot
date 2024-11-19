@@ -1,5 +1,5 @@
 
-# GoonBot
+# GoonBot from TarkovPal.com
 
 ![Bot Online](https://github.com/user-attachments/assets/b82fdb1a-5f49-463d-aae4-14a1f3b71212)
 
